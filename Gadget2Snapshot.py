@@ -547,9 +547,9 @@ class Gadget2Snapshot(object):
         ----------
         ppos: (3,) array
             Particle positions.
-            hpos: (3,) array
+        hpos: (3,) array
             Halo positions.
-            blen: None or double
+        blen: None or double
             Box length. Default is None
 
         Returns
