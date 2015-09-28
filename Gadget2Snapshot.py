@@ -570,57 +570,67 @@ class Gadget2Snapshot(object):
 
 
     def scatterXYZ(self, fig=None, **kwargs):
-		"""
-		Scatterplot the particles in XY, XZ, YZ projected plane.
+        """
+        Scatterplot the particles in XY, XZ, YZ projected plane.
 
         Parameters
         ----------
 
-        fig: matplotlib.figure.Figure
-            Figure object.
+        fig: matplotlib.figure.Figure object
 
-		"""
-
+        """
         if not matplotlib:
-			raise ImportError("matplotlib is not imported, install matplotlib first!")
+            raise ImportError("matplotlib is not imported, install matplotlib first!")
 
-		# Get the positions if you didn't do it before
-		if not hasattr(self,"positions"):
-			self.getPositions()
+        # Get the positions if you didn't do it before
+        if not hasattr(self, "positions"):
+            self.getPositions()
 
-		# Instantiate figure
-		if fig is None:
-			self.fig = plt.figure()
-		else:
-			self.fig = fig
+        # Instantiate figure
+        if fig is None:
+            self.fig = plt.figure()
+        else:
+            self.fig = fig
 
         ax1 = fig.add_subplot(1,3,1)
 
-        ax1.scatter(self.positions[ptype==0,0], self.positions[ptype==0,1], s=1, color='b')
-        ax1.scatter(self.positions[ptype==1,0], self.positions[ptype==1,1], s=1, color='k')
-        ax1.scatter(self.positions[ptype==2,0], self.positions[ptype==2,1], s=1, color='r')
-        ax1.scatter(self.positions[ptype==3,0], self.positions[ptype==3,1], s=1, color='g')
-        ax1.scatter(self.positions[ptype==4,0], self.positions[ptype==4,1], s=1, color='y')
+        if not hasattr(self, "types"):
+            ax1.scatter(self.positions[:,0], self.positions[:,1], s=1, color='k')
+        else:
+            ax1.scatter(self.positions[ptype==0,0], self.positions[ptype==0,1], s=1, color='b')
+            ax1.scatter(self.positions[ptype==1,0], self.positions[ptype==1,1], s=1, color='k')
+            ax1.scatter(self.positions[ptype==2,0], self.positions[ptype==2,1], s=1, color='r')
+            ax1.scatter(self.positions[ptype==3,0], self.positions[ptype==3,1], s=1, color='g')
+            ax1.scatter(self.positions[ptype==4,0], self.positions[ptype==4,1], s=1, color='y')
+
         ax1.set_xlabel("$X\; \mathrm{kpc}/h$")
         ax1.set_ylabel("$Y\; \mathrm{kpc}/h$")
 
         ax2 = fig.add_subplot(1,3,2)
 
-        ax2.scatter(self.positions[ptype==0,0], self.positions[ptype==0,2], s=1, color='b')
-        ax2.scatter(self.positions[ptype==1,0], self.positions[ptype==1,2], s=1, color='k')
-        ax2.scatter(self.positions[ptype==2,0], self.positions[ptype==2,2], s=1, color='r')
-        ax2.scatter(self.positions[ptype==3,0], self.positions[ptype==3,2], s=1, color='g')
-        ax2.scatter(self.positions[ptype==4,0], self.positions[ptype==4,2], s=1, color='y')
+        if not hasattr(self, "types"):
+            ax2.scatter(self.positions[:,0], self.positions[:,2], s=1, color='k')
+        else:
+            ax2.scatter(self.positions[ptype==0,0], self.positions[ptype==0,2], s=1, color='b')
+            ax2.scatter(self.positions[ptype==1,0], self.positions[ptype==1,2], s=1, color='k')
+            ax2.scatter(self.positions[ptype==2,0], self.positions[ptype==2,2], s=1, color='r')
+            ax2.scatter(self.positions[ptype==3,0], self.positions[ptype==3,2], s=1, color='g')
+            ax2.scatter(self.positions[ptype==4,0], self.positions[ptype==4,2], s=1, color='y')
+
         ax2.set_xlabel("$X\; \mathrm{kpc}/h$")
         ax2.set_ylabel("$Z\; \mathrm{kpc}/h$")
 
         ax3 = fig.add_subplot(1,3,3)
 
-        ax3.scatter(self.positions[ptype==0,1], self.positions[ptype==0,2], s=1, color='b')
-        ax3.scatter(self.positions[ptype==1,1], self.positions[ptype==1,2], s=1, color='k')
-        ax3.scatter(self.positions[ptype==2,1], self.positions[ptype==2,2], s=1, color='r')
-        ax3.scatter(self.positions[ptype==3,1], self.positions[ptype==3,2], s=1, color='g')
-        ax3.scatter(self.positions[ptype==4,1], self.positions[ptype==4,2], s=1, color='y')
+        if not hasattr(self, "types"):
+            ax3.scatter(self.positions[:,1], self.positions[:,2], s=1, color='k')
+        else:
+            ax3.scatter(self.positions[ptype==0,1], self.positions[ptype==0,2], s=1, color='b')
+            ax3.scatter(self.positions[ptype==1,1], self.positions[ptype==1,2], s=1, color='k')
+            ax3.scatter(self.positions[ptype==2,1], self.positions[ptype==2,2], s=1, color='r')
+            ax3.scatter(self.positions[ptype==3,1], self.positions[ptype==3,2], s=1, color='g')
+            ax3.scatter(self.positions[ptype==4,1], self.positions[ptype==4,2], s=1, color='y')
+
         ax3.set_xlabel("$Y\; \mathrm{kpc}/h$")
         ax3.set_ylabel("$Z\; \mathrm{kpc}/h$")
 
