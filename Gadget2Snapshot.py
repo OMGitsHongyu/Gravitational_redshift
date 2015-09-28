@@ -324,17 +324,15 @@ class Gadget2Snapshot(object):
         """
         self.getHeader(save)
         pos = self.getPositions(save)
-        if vel: vel = self.getVelocities(save)
+        if readvel: vel = self.getVelocities(save)
         pid = self.getIDs(save)
         ptype, pmass = self.getTypeMass(save)
 
         if self.fp.read(1):
             pot = self.getPotentials(save)
             print "Done reading with potential"
-            return ptype, pid, pmass, pos, vel, pot
         else:
             print "Done reading"
-            return ptype, pid, pmass, pos, vel
 
 
     def setPositions(self, pos):
@@ -408,13 +406,12 @@ class Gadget2Snapshot(object):
         """
         precb = (self.preci + 1) * 4
 
-        assert self.types.shape[0] == self.mass.shape[0] == self.positions.shape[0]                == self.velocities.shape[0], "Number of particles are not the same!"
+        assert self.types.shape[0] == self.mass.shape[0] == self.positions.shape[0]\
+                == self.velocities.shape[0], "Number of particles are not the same!"
 
         type_ind = np.argsort(self.types, kind='mergesort')
         ptype_sorted = self.types[type_ind]
         pmass_sorted = self.mass[type_ind]
-        pos_sorted = self.positions[type_ind]
-        vel_sorted = self.velocities[type_ind]
         Npart = np.zeros(6, dtype=np.int32)
         Massarr = np.zeros(6, dtype=('f'+str(precb)))
         Nall = np.zeros(6, dtype=np.int32)
@@ -458,8 +455,25 @@ class Gadget2Snapshot(object):
         assert hasattr(self, "types"), "Types must be specified!"
         assert hasattr(self, "mass"), "Mass must be specified!"
         assert hasattr(self, "positions"), "Positions must be specified!"
+        assert not hasattr(self, "velocities"), "Velocities are set to 0s!"
+
+        precb = (self.preci + 1) * 4
 
         self._setHeader(**kwargs)
+        type_ind = np.argsort(self.types, kind='mergesort')
+        ptype_sorted = self.types[type_ind]
+        pmass_sorted = self.mass[type_ind]
+        pos_sorted = self.positions[type_ind]
+
+        if not hasattr(self, "velocities"):
+            vel_sorted = np.zeros((type_ind.shape[0], 3), dtype=('f'+str(precb)))
+        else:
+            vel_sorted = self.velocities[type_ind]
+
+        Npart = np.zeros(6, dtype=np.int32)
+        Massarr = np.zeros(6, dtype=('f'+str(precb)))
+        Nall = np.zeros(6, dtype=np.int32)
+        typetotal = len(pmass_sorted)
 
         count = 0
         vpcount = 0
