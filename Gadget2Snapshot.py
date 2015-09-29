@@ -413,7 +413,7 @@ class Gadget2Snapshot(object):
         precb = (self.preci + 1) * 4
 
         assert self.types.shape[0] == self.mass.shape[0] == self.positions.shape[0]\
-                == self.velocities.shape[0], "Number of particles are not the same!"
+                , "Number of particles are not the same!"
 
         type_ind = np.argsort(self.types, kind='mergesort')
         ptype_sorted = self.types[type_ind]
@@ -461,7 +461,7 @@ class Gadget2Snapshot(object):
         assert hasattr(self, "types"), "Types must be specified!"
         assert hasattr(self, "mass"), "Mass must be specified!"
         assert hasattr(self, "positions"), "Positions must be specified!"
-        assert not hasattr(self, "velocities"), "Velocities are set to 0s!"
+        if not hasattr(self, "velocities"): print "Velocities are set to 0s!"
 
         precb = (self.preci + 1) * 4
 
@@ -505,12 +505,14 @@ class Gadget2Snapshot(object):
         mass_size = np.array(typetotal * 3 * precb, dtype=np.int32)
         if self.longid:
             pid_size = np.array(typetotal * 8, dtype=np.int32)
+            pid_sorted = np.arange(typetotal, dtype=np.int64)
         else:
             pid_size = np.array(typetotal * 4, dtype=np.int32)
+            pid_sorted = np.arange(typetotal, dtype=np.int32)
 
         fw = open(fname,'wb')
         header_size.tofile(fw)
-        header_node[0].tofile(fw)
+        self.header.tofile(fw)
         header_size.tofile(fw)
         pos_size.tofile(fw)
         pos_sorted.tofile(fw)
