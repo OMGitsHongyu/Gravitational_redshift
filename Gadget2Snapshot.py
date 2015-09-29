@@ -539,6 +539,7 @@ class Gadget2Snapshot(object):
         fw.close()
 
 
+    @staticmethod
     def euclidean_periodic(ppos, hpos, blen=None):
         """
         Calculate Eculidean distances within a squared box.
