@@ -7,13 +7,13 @@ extra_args = []
 # compilers.
 # extra_args = ["-fopenmp"]
 
-exts = [Extension("pot_bf",
-                  ["pot_bf.pyx"],
+exts = [Extension("calculator",
+                  ["calculator.pyx"],
                   extra_compile_args=extra_args,
                   extra_link_args=extra_args),
         ]
 
 setup(
-    name = "Potential calculation by brute force",
+    name = "Calculation",
     ext_modules = cythonize(exts),
 )

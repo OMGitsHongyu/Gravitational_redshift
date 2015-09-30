@@ -541,37 +541,6 @@ class Gadget2Snapshot(object):
         fw.close()
 
 
-    @staticmethod
-    def euclidean_periodic(ppos, hpos, blen=None):
-        """
-        Calculate Eculidean distances within a squared box.
-
-        Parameters
-        ----------
-        ppos: (3,) array
-            Particle positions.
-        hpos: (3,) array
-            Halo positions.
-        blen: None or double
-            Box length. Default is None
-
-        Returns
-        -------
-        Eculidean distance: double
-            Eculidean distance with periodic boundary conditions.
-
-        """
-        assert ppos.shape[0] == 3
-        assert hpos.shape[0] == 3
-        dx, dy, dz = np.fabs(ppos - hpos)
-        if blen is not None:
-            if dx > blen * 1. / 2: dx = blen - dx;
-            if dy > blen * 1. / 2: dy = blen - dy;
-            if dz > blen * 1. / 2: dz = blen - dz;
-
-        return np.sqrt(dx * dx + dy * dy + dz * dz)
-
-
     def scatterXYZ(self, fig=None, **kwargs):
         """
         Scatterplot the particles in XY, XZ, YZ projected plane.
