@@ -44,12 +44,9 @@ class Gadget2Snapshot(object):
             guide suggests, long for large simulations (NKhandai). Default is 'False'.
 
         """
-        assert (type(fp) == file) or (fp is None), "Call the open() method first!"
-
-        if fp is not None:
-            self.fp = fp
-            self.preci = preci
-            self.longid = longid
+        self.fp = fp
+        self.preci = preci
+        self.longid = longid
 
     @classmethod
     def open(cls, fname):
