@@ -30,7 +30,7 @@ class Gadget2Snapshot(object):
     A class dealing with I/O, modifying data and visualization of Gadget 2 snapshot files.
     """
 
-    def __init__(self, fp=None, preci=0, longid='False'):
+    def __init__(self, fp=None, preci=0, longids='False'):
         """
 
         Parameters
@@ -39,14 +39,14 @@ class Gadget2Snapshot(object):
             0 -> float, 1 -> double
             Single or double precision. In NKhandai's file, 1 from dirno = '061',
             0 otherwise. Default is 0.
-        longid : boolean, optional
+        longids : boolean, optional
             The ID format for the input snapshot files. Int as the Gadget2 user
             guide suggests, long for large simulations (NKhandai). Default is 'False'.
 
         """
         self.fp = fp
         self.preci = preci
-        self.longid = longid
+        self.longids = longids
 
     @classmethod
     def open(cls, fname):
@@ -188,13 +188,11 @@ class Gadget2Snapshot(object):
 
         self.fp.seek(256+24+2*3*precb*totNpart, 0)
         int7 = np.fromfile(self.fp, dtype=np.int32, count=1)[0]
-        if self.longid == 'False':
-            pid = np.fromfile(self.fp, dtype=np.int32, count=totNpart)
+        if self.longids == 'False':
+            pid = np.fromfile(self.fp, dtype=np.uint32, count=totNpart)
         else:
-            if self.longid:
-                pid = np.fromfile(self.fp, dtype=np.int64, count=totNpart)
-            else:
-                raise ValueError('longid must be either True or False')
+            pid = np.fromfile(self.fp, dtype=np.uint64, count=totNpart)
+
         int8 = np.fromfile(self.fp, dtype=np.int32, count=1)[0]
         assert int7 == int8, "IDs are not read properly!"
 
@@ -224,7 +222,7 @@ class Gadget2Snapshot(object):
         """
         precb = (self.preci + 1) * 4
         totNpart = self.header['Npart'].sum()
-        if self.longid == 'False':
+        if self.longids == 'False':
             self.fp.seek(256+32+2*3*precb*totNpart+4*totNpart, 0)
         else:
             self.fp.seek(256+32+2*3*precb*totNpart+8*totNpart, 0)
@@ -245,7 +243,8 @@ class Gadget2Snapshot(object):
         for i in range(6):
             ptype[count : count + self.header['Npart'][i]] = i
             if (self.header['Massarr'][i] == 0) & (Nm > 0):
-                pmass[count : count + self.header['Npart'][i]] = (vpmass[vpcount                      : vpcount + self.header['Npart'][i]]).astype('f'+str(precb))
+                pmass[count : count + self.header['Npart'][i]] = (vpmass[vpcount\
+                        : vpcount + self.header['Npart'][i]]).astype('f'+str(precb))
                 vpcount += self.header['Npart'][i]
             if self.header['Massarr'][i] > 0:
                 pmass[count : count + self.header['Npart'][i]] = self.header['Massarr'][i]
@@ -282,13 +281,15 @@ class Gadget2Snapshot(object):
             if self.header['Massarr'][i] == 0:
                 Nm += self.header['Npart'][i]
 
-        if self.longid == 'False':
+        if self.longids == 'False':
             self.fp.seek(256+40+2*3*precb*totNpart+4*totNpart+Nm*precb, 0)
         else:
             self.fp.seek(256+40+2*3*precb*totNpart+8*totNpart+Nm*precb, 0)
         int11 = np.fromfile(self.fp, dtype=np.int32, count=1)[0]
         pot = np.fromfile(self.fp, dtype=('f'+str(precb)), count=totNpart)
         int12 = np.fromfile(self.fp, dtype=np.int32, count=1)[0]
+        print "int11=", int11
+        print "int12=", int12
         assert int11 == int12, "Potentials are not read properly!"
 
         if save: self.potentials = pot
@@ -298,7 +299,7 @@ class Gadget2Snapshot(object):
         return pot
 
 
-    def readSnapshot(self, save=True, readvel=False):
+    def readSnapshot(self, save=True, readvel=False, readpot=False):
         """
         Read in the snapshot file.
 
@@ -331,7 +332,7 @@ class Gadget2Snapshot(object):
         pid = self.getIDs(save)
         ptype, pmass = self.getTypeMass(save)
 
-        if self.fp.read(1):
+        if self.fp.read(1) and readpot:
             pot = self.getPotentials(save)
             print "Done reading with potential"
         else:
@@ -500,7 +501,7 @@ class Gadget2Snapshot(object):
         pos_size = np.array(typetotal * 3 * precb, dtype=np.int32)
         vel_size = np.array(typetotal * 3 * precb, dtype=np.int32)
         mass_size = np.array(typetotal * 3 * precb, dtype=np.int32)
-        if self.longid:
+        if self.longids:
             pid_size = np.array(typetotal * 8, dtype=np.int32)
             pid_sorted = np.arange(typetotal, dtype=np.int64)
         else:
