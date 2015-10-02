@@ -30,7 +30,7 @@ class Gadget2Snapshot(object):
     A class dealing with I/O, modifying data and visualization of Gadget 2 snapshot files.
     """
 
-    def __init__(self, fp=None, preci=0, longids='False'):
+    def __init__(self, fp=None, preci=0, longids=False):
         """
 
         Parameters
@@ -41,7 +41,7 @@ class Gadget2Snapshot(object):
             0 otherwise. Default is 0.
         longids : boolean, optional
             The ID format for the input snapshot files. Int as the Gadget2 user
-            guide suggests, long for large simulations (NKhandai). Default is 'False'.
+            guide suggests, long for large simulations (NKhandai). Default is False.
 
         """
         self.fp = fp
@@ -188,11 +188,10 @@ class Gadget2Snapshot(object):
 
         self.fp.seek(256+24+2*3*precb*totNpart, 0)
         int7 = np.fromfile(self.fp, dtype=np.int32, count=1)[0]
-        if self.longids == 'False':
+        if self.longids == False:
             pid = np.fromfile(self.fp, dtype=np.uint32, count=totNpart)
         else:
             pid = np.fromfile(self.fp, dtype=np.uint64, count=totNpart)
-
         int8 = np.fromfile(self.fp, dtype=np.int32, count=1)[0]
         assert int7 == int8, "IDs are not read properly!"
 
@@ -222,7 +221,7 @@ class Gadget2Snapshot(object):
         """
         precb = (self.preci + 1) * 4
         totNpart = self.header['Npart'].sum()
-        if self.longids == 'False':
+        if self.longids == False:
             self.fp.seek(256+32+2*3*precb*totNpart+4*totNpart, 0)
         else:
             self.fp.seek(256+32+2*3*precb*totNpart+8*totNpart, 0)
@@ -281,15 +280,13 @@ class Gadget2Snapshot(object):
             if self.header['Massarr'][i] == 0:
                 Nm += self.header['Npart'][i]
 
-        if self.longids == 'False':
+        if self.longids == False:
             self.fp.seek(256+40+2*3*precb*totNpart+4*totNpart+Nm*precb, 0)
         else:
             self.fp.seek(256+40+2*3*precb*totNpart+8*totNpart+Nm*precb, 0)
         int11 = np.fromfile(self.fp, dtype=np.int32, count=1)[0]
         pot = np.fromfile(self.fp, dtype=('f'+str(precb)), count=totNpart)
         int12 = np.fromfile(self.fp, dtype=np.int32, count=1)[0]
-        print "int11=", int11
-        print "int12=", int12
         assert int11 == int12, "Potentials are not read properly!"
 
         if save: self.potentials = pot
