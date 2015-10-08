@@ -24,3 +24,7 @@ galaxy_select.setTypes(galaxy.types[pselect])
 galaxy_select.setMass(galaxy.mass[pselect])
 galaxy_select.setPositions(galaxy.positions[pselect,:])
 galaxy_select.writeSnapshot('galaxy_select')
+
+read_select = gs.Gadget2Snapshot.open('galaxy_select')
+read_select.readSnapshot()
+print "read successfully"

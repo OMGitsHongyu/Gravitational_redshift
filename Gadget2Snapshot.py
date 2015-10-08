@@ -281,9 +281,16 @@ class Gadget2Snapshot(object):
                 Nm += self.header['Npart'][i]
 
         if self.longids == False:
-            self.fp.seek(256+40+2*3*precb*totNpart+4*totNpart+Nm*precb, 0)
+            if Nm == 0:
+                self.fp.seek(256+32+2*3*precb*totNpart+4*totNpart, 0)
+            else:
+                self.fp.seek(256+40+2*3*precb*totNpart+4*totNpart+Nm*precb, 0)
         else:
-            self.fp.seek(256+40+2*3*precb*totNpart+8*totNpart+Nm*precb, 0)
+            if Nm == 0:
+                self.fp.seek(256+32+2*3*precb*totNpart+8*totNpart, 0)
+            else:
+                self.fp.seek(256+40+2*3*precb*totNpart+8*totNpart+Nm*precb, 0)
+
         int11 = np.fromfile(self.fp, dtype=np.int32, count=1)[0]
         pot = np.fromfile(self.fp, dtype=('f'+str(precb)), count=totNpart)
         int12 = np.fromfile(self.fp, dtype=np.int32, count=1)[0]
@@ -543,7 +550,7 @@ class Gadget2Snapshot(object):
         Parameters
         ----------
 
-        fig: matplotlib.figure.Figure object
+        fig : matplotlib.figure.Figure object
 
         """
         if not matplotlib:
