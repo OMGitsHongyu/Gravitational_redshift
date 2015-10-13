@@ -255,3 +255,59 @@ def density_profile_1d(nbins, dr_large, pfeat, pos, center, blen, islog=False):
     plt.show()
 
     return feat_profile
+
+def slicePlot(pos, plane, center, frac, feat, **kwargs):
+    """
+    Plot a slice along 'x' or 'y' or 'z' direction.
+
+    Parameters
+    ----------
+    pos : (N,3) array of float or double
+        Particle positions.
+    plane : {'xy','yx','z','yz','zy','x','xz','zx','y'}, string
+        The direction (plane) of the slice.
+    center : (3,) array of float or double
+        Make sure the slice go through the center to have more
+        information, but could be any point.
+    frac : float or double
+        Slice width is a fraction of the box length.
+    feat :
+    kwargs : optional
+        See numpy.histogram2d.
+
+    Returns
+    -------
+    ax : matplotlib.axes._subplots.AxesSubplot
+    cbar : matplotlib.colorbar.Colorbar instance
+
+    """
+    if plane in ['xy', 'yx', 'z']:
+        fraclen = np.fabs(pos[:,2] - center[2]).max() * frac
+        slice_ind = np.fabs(pos[:,2] - center[2]) <= fraclen
+        x, y = pos[slice_ind,0], pos[slice_ind,1]
+        xlabel, ylabel = 'x', 'y'
+    elif plane in ['yz', 'zy', 'x']:
+        fraclen = np.fabs(pos[:,0] - center[0]).max() * frac
+        slice_ind = np.fabs(pos[:,0] - center[0]) <= fraclen
+        x, y = pos[slice_ind,1], pos[slice_ind,2]
+        xlabel, ylabel = 'y', 'z'
+    elif plane in ['xz', 'zx', 'y']:
+        fraclen = np.fabs(pos[:,1] - center[1]).max() * frac
+        slice_ind = np.fabs(pos[:,1] - center[1]) <= fraclen
+        x, y = pos[slice_ind,0], pos[slice_ind,2]
+        xlabel, ylabel = 'x', 'z'
+    else: raise ValueError('A projection plane must correctly specified!')
+
+    w = feat[slice_ind]
+
+    H, xedges, yedges = np.histogram2d(x, y, weights = w, **kwargs)
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111)
+    im = ax.imshow(H, interpolation='nearest', origin='low',
+                extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]])
+    ax.set_xlabel(xlabel+r'$\;\mathrm{kpc}/h$')
+    ax.set_ylabel(ylabel+r'$\;\mathrm{kpc}/h$')
+    ax.set_aspect('equal')
+    cbar = fig.colorbar(im)
+
+    return ax, cbar
