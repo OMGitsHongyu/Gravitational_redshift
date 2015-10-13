@@ -94,7 +94,7 @@ def potential_bf(float epsilon, float[::1] pmass, float[:,::1] pos,\
     return pot_bf
 
 
-def profile_1d(nbins, pfeat, pos, center, blen, islog=False):
+def profile_1d(nbins, dr_large, pfeat, pos, center, blen, islog=False):
     """
     Calculate the potential profile.
 
@@ -102,6 +102,8 @@ def profile_1d(nbins, pfeat, pos, center, blen, islog=False):
     ----------
     nbins : int
         Number of bins.
+    dr_large : double
+        xlim to plot.
     pfeat : (N,3) array of float
         Particle feature (i.e. potential).
     pos : (N,3) array of float
@@ -127,7 +129,6 @@ def profile_1d(nbins, pfeat, pos, center, blen, islog=False):
     dist_center = np.zeros((Numpart,))
     for i in xrange(Numpart):
         dist_center[i] = euclidean_periodic(pos[i], center, blen)
-    dr_large = dist_center.max() + np.finfo(np.float32).eps
     dr_small = max(dist_center.min(), np.finfo(np.float32).eps)
 
     if islog:
@@ -145,7 +146,7 @@ def profile_1d(nbins, pfeat, pos, center, blen, islog=False):
     for i in xrange(nbins):
         feat_profile[i,1] = np.sum(ind_array==i)
         feat_profile[i,2] = np.sum(pfeat[ind_array==i])
-        feat_profile[i,3] = np.std(pfeat[ind_array==i], ddof=1) / sqrt(feat_profile[i,0])
+        feat_profile[i,3] = np.std(pfeat[ind_array==i], ddof=1) / np.sqrt(np.sum(ind_array==i))
 
     fig = plt.figure()
 
@@ -172,7 +173,7 @@ def profile_1d(nbins, pfeat, pos, center, blen, islog=False):
     return feat_profile
 
 
-def density_profile_1d(nbins, pfeat, pos, center, blen, islog=False):
+def density_profile_1d(nbins, dr_large, pfeat, pos, center, blen, islog=False):
     """
     Calculate the density profile.
 
@@ -180,6 +181,8 @@ def density_profile_1d(nbins, pfeat, pos, center, blen, islog=False):
     ----------
     nbins : int
         Number of bins.
+    dr_large : double
+        xlim to plot.
     pfeat : (N,3) array of float
         Particle feature (i.e. mass).
     pos : (N,3) array of float
@@ -207,8 +210,9 @@ def density_profile_1d(nbins, pfeat, pos, center, blen, islog=False):
     dist_center = np.zeros((Numpart,))
     for i in xrange(Numpart):
         dist_center[i] = euclidean_periodic(pos[i], center, blen)
-    dr_large = dist_center.max() + np.finfo(np.float32).eps
     dr_small = max(dist_center.min(), np.finfo(np.float32).eps)
+    print "dist_center.min = ", dist_center.min()
+    print "dr_small = ", dr_small
 
     if islog:
         logdx = np.log(dr_large / dr_small) * 1. / nbins
@@ -225,8 +229,8 @@ def density_profile_1d(nbins, pfeat, pos, center, blen, islog=False):
 
     for i in xrange(nbins):
         feat_profile[i,1] = np.sum(ind_array==i)
-        feat_profile[i,2] = np.sum(pfeat[ind_array==i]) *10. / (4 * np.pi * (dr[i+1] ** 3 - dr[i] ** 3) / 3)
-        feat_profile[i,3] = np.sqrt(np.sum(pfeat[ind_array==i])) *10. / (4 * np.pi * (dr[i+1] ** 3 - dr[i] ** 3) / 3)
+        feat_profile[i,2] = np.sum(pfeat[ind_array==i]) / (4 * np.pi * (dr[i+1] ** 3 - dr[i] ** 3) / 3)
+        feat_profile[i,3] = np.sqrt(np.sum(pfeat[ind_array==i])) / (4 * np.pi * (dr[i+1] ** 3 - dr[i] ** 3) / 3)
 
     fig = plt.figure()
 
@@ -240,7 +244,7 @@ def density_profile_1d(nbins, pfeat, pos, center, blen, islog=False):
     ax2.plot(feat_profile[:,0], feat_profile[:,2], color='b')
     ax2.errorbar(feat_profile[:,0], feat_profile[:,2], yerr=feat_profile[:,3], color='b')
     ax2.set_xlabel('$r\; \mathrm{kpc}/h$')
-    ax2.set_ylabel(r'$\rho\; h^2M_\odot\mathrm{pc}^{-3}$')
+    ax2.set_ylabel(r'$\rho\; 10^{10}h^2M_\odot\mathrm{kpc}^{-3}$')
 
     if islog:
         ax1.set_xscale('log')
