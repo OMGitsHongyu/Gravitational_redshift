@@ -256,7 +256,8 @@ def density_profile_1d(nbins, dr_large, pfeat, pos, center, blen, islog=False):
 
     return feat_profile
 
-def slicePlot(pos, plane, center, frac, feat, **kwargs):
+
+def slicePlot(pos, plane, center, frac, feat_density, feat_grav, nbins):
     """
     Plot a slice along 'x' or 'y' or 'z' direction.
 
@@ -271,14 +272,16 @@ def slicePlot(pos, plane, center, frac, feat, **kwargs):
         information, but could be any point.
     frac : float or double
         Slice width is a fraction of the box length.
-    feat :
+    feat_density : (N,) array of float or double
+        Particle mass.
+    feat_grav: (N,) array of float or double
+        Particle potentials.
     kwargs : optional
-        See numpy.histogram2d.
+        See numpy.histogram2d bins.
 
     Returns
     -------
     ax : matplotlib.axes._subplots.AxesSubplot
-    cbar : matplotlib.colorbar.Colorbar instance
 
     """
     if plane in ['xy', 'yx', 'z']:
@@ -298,16 +301,27 @@ def slicePlot(pos, plane, center, frac, feat, **kwargs):
         xlabel, ylabel = 'x', 'z'
     else: raise ValueError('A projection plane must correctly specified!')
 
-    w = feat[slice_ind]
+    w_density = feat_density[slice_ind]
+    w_grav = feat_grav[slice_ind]
 
-    H, xedges, yedges = np.histogram2d(x, y, weights = w, **kwargs)
+    H_density, xedges, yedges = np.histogram2d(x, y, weights = w_density, bins=nbins)
+    Hw, xedges, yedges = np.histogram2d(x, y, weights = w_grav, bins=nbins)
+    Hn, xedges, yedges = np.histogram2d(x, y, bins=nbins)
+    Hwmask = np.ma.masked_where(Hw==0 ,Hw)
+    Hnmask = np.ma.masked_where(Hn==0 ,Hn)
+    grav_profile = Hwmask / Hnmask
+
+    H_density = H_density * 1. / ((xedges[1] - xedges[0]) * (yedges[1] - yedges[0]) * 2 * fraclen)
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111)
-    im = ax.imshow(H, interpolation='nearest', origin='low',
+    im = ax.imshow(H_density, interpolation='nearest', origin='lower',
                 extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]])
+    cs = ax.contour(grav_profile, origin='lower', colors='k',
+                extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]])
+    plt.clabel(cs, fontsize=9, inline=1)
     ax.set_xlabel(xlabel+r'$\;\mathrm{kpc}/h$')
     ax.set_ylabel(ylabel+r'$\;\mathrm{kpc}/h$')
     ax.set_aspect('equal')
     cbar = fig.colorbar(im)
 
-    return ax, cbar
+    return ax
