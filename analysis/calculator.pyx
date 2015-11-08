@@ -42,6 +42,41 @@ cpdef float euclidean_periodic(float[::1] ppos, float[::1] hpos,\
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
+cpdef double deuclidean_periodic(double[::1] ppos, double[::1] hpos,\
+        double blen) nogil:
+    """
+    Calculate Euclidean distances within a squared box with double arrays.
+
+    Parameters
+    ----------
+    ppos: (3,) array
+        Particle positions.
+    hpos: (3,) array
+        Halo positions.
+    blen: double
+        Box length. If blen < 0, there is no boundary condition.
+    Returns
+    -------
+    Eculidean distance: double
+        Eculidean distance with periodic boundary conditions.
+
+    """
+    cdef double dx, dy, dz
+    dx = fabs(ppos[0] - hpos[0])
+    dy = fabs(ppos[1] - hpos[1])
+    dz = fabs(ppos[2] - hpos[2])
+
+    if blen > 0:
+        if dx > blen / 2.0: dx = blen - dx;
+        if dy > blen / 2.0: dy = blen - dy;
+        if dz > blen / 2.0: dz = blen - dz;
+
+    return sqrt(dx * dx + dy * dy + dz * dz)
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
 def potential_bf(float epsilon, float[::1] pmass, float[:,::1] pos,\
         float blen):
     """
